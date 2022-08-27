@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sizer/flutter_sizer.dart';
 import 'package:get/get.dart';
+
 import 'package:weathercheck/route/routelist.dart';
 import 'package:weathercheck/route/routename.dart';
 
@@ -13,11 +15,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Flutter Demo',
-      getPages: Routelist.list,
-      initialRoute: home,
-      debugShowCheckedModeBanner: false,
-    );
+    return FlutterSizer(builder: (context, x, y) {
+      return GetMaterialApp(
+        title: 'Flutter Demo',
+        getPages: Routelist.list,
+        initialRoute: home,
+        debugShowCheckedModeBanner: false,
+      );
+    });
   }
 }
