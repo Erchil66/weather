@@ -7,3 +7,5 @@ const Color white = Colors.white;
 const Color textColor = Color(0xFF332821);
 const Color pinkish = Color(0xFFD4426F);
 const Color lightviolet = Color(0xFF6A75BA);
+const Color skyblue = Color(0xFF658ED9);
+const Color red = Color(0xFFD86191);

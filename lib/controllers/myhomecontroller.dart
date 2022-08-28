@@ -9,47 +9,51 @@ import 'package:weathercheck/handler/diotemplate.dart';
 import 'package:weathercheck/model/currentforecastmodel.dart';
 import 'package:weathercheck/model/forecastmodel.dart';
 import 'package:weathercheck/model/searchplace.dart';
+import 'package:weathercheck/route/routename.dart';
 
 class MyhomeController extends GetxController {
   final Rx<Currentforecastmodel> currentModel = Currentforecastmodel().obs;
   final List<Forecastday> forecastList = <Forecastday>[].obs;
   final List<Searchplace> searchlist = <Searchplace>[].obs;
   final List<Currentforecastmodel> placelist = <Currentforecastmodel>[].obs;
-  final format = DateFormat("EEEE").add_jm();
+  final format = DateFormat("EEEE").add_j();
+  final format1getday = DateFormat("EEEE");
   final pagecontroller = PageController(initialPage: 1, viewportFraction: 0.7);
   final currentindex = 0.obs;
+  final precipitation = "".obs,
+      humidity = "".obs,
+      wind = "".obs,
+      placename = "".obs;
+  final Rx<Currentforecastmodel> currentselected = Currentforecastmodel().obs;
   @override
   void onInit() {
     searchplace();
-
     // getCurrentForecast();
     // getForecast();
 
     super.onInit();
   }
 
-  getCurrentForecast() async {
-    try {
-      final response = await ServiceApi.currentforecastcall(
-          url: ApiWeather.currentforecast, q: "Tagum City,8100,PH");
+  // getCurrentForecast() async {
+  //   try {
+  //     final response = await ServiceApi.currentforecastcall(
+  //         url: ApiWeather.currentforecast, q: "Tagum City,8100,PH");
 
-      currentModel(response);
-    } finally {
-      if (currentModel.value.location != null) {
-        final name = currentModel.value.location!.name;
-        // log(name.toString());
-      }
-    }
-  }
+  //     currentModel(response);
+  //   } finally {
+  //     if (currentModel.value.location != null) {
+  //       final name = currentModel.value.location!.name;
+  //       // log(name.toString());
+  //     }
+  //   }
+  // }
 
-  getForecast() async {
-    try {
-      final response = await ServiceApi.forecastcall(
-          url: ApiWeather.forecast, q: "Tagum City,8100,PH", days: 2);
-      forecastList.assignAll(response);
-    } finally {
-      // log(forecastList.map((e) => e.date).toList().toString());
-    }
+  getForecast(String? params) async {
+    forecastList.clear();
+    final response = await ServiceApi.forecastcall(
+        url: ApiWeather.forecast, q: params, days: 5);
+    forecastList.assignAll(response);
+    log(forecastList.map((e) => e.day!.condition!.text).toString());
   }
 
   searchplace() async {
@@ -63,14 +67,31 @@ class MyhomeController extends GetxController {
         log("${x.lat.toString()},${x.lon.toString()}");
         final response = await ServiceApi.currentforecastcall(
             url: ApiWeather.currentforecast,
-            q: "Tagum City,8100,PH,${x.lat},${x.lon}");
+            q: "${x.name},${x.region},PH,${x.lat},${x.lon}");
+
         placelist.add(response);
       }
     }
   }
 
-  onchange(int? value) {
+  onchange(
+    int? value,
+  ) {
     currentindex(value);
-    log(currentindex.value.toString());
+    final model = placelist[value!];
+    precipitation(model.current!.cloud.toString());
+
+    humidity(model.current!.tempC.toString());
+    wind(model.current!.windKph.toString());
+  }
+
+  onselectedgoto(Currentforecastmodel? value, String? name) {
+    placename(name);
+    currentselected(value);
+
+    getForecast(
+        "${placename.value},${currentselected.value.location!.region},PH,${currentselected.value.location!.lat},${currentselected.value.location!.lon}");
+
+    Get.toNamed(weatherpage);
   }
 }
